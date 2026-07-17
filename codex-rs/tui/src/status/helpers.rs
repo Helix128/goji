@@ -10,10 +10,6 @@ use codex_utils_path_uri::PathUri;
 use std::path::Path;
 use unicode_width::UnicodeWidthStr;
 
-fn normalize_agents_display_path(path: &Path) -> String {
-    dunce::simplified(path).display().to_string()
-}
-
 pub(crate) fn compose_model_display(
     model_name: &str,
     entries: &[(&str, String)],
@@ -72,13 +68,13 @@ pub(crate) fn compose_agents_summary(config: &Config, paths: &[PathUri]) -> Stri
                     let up = format!("..{}", std::path::MAIN_SEPARATOR);
                     format!("{}{}", up.repeat(ups), file_name)
                 } else if let Ok(stripped) = p.strip_prefix(&config.cwd) {
-                    normalize_agents_display_path(stripped)
+                    dunce::simplified(stripped).display().to_string()
                 } else {
-                    normalize_agents_display_path(p)
+                    format_directory_display(p, /*max_width*/ None)
                 }
             }
         } else {
-            normalize_agents_display_path(p)
+            format_directory_display(p, /*max_width*/ None)
         };
         rels.push(display);
     }
