@@ -2,8 +2,7 @@
 
 Goji is a token efficient coding agent powered by Codex. 
 
-This project contains code derived from OpenAI Codex CLI,
-licensed under the Apache License 2.0.
+This project derives from OpenAI Codex CLI, licensed under the Apache License 2.0.
 
 # Codex CLI
 
