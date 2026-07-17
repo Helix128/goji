@@ -2,15 +2,11 @@
 source: tui/src/chatwidget/tests/popups_and_settings.rs
 expression: popup
 ---
-  Select Model and Effort
-  Access legacy models by running codex -m <model_name> or in your config.toml
+  Select Model
+  Pick a quick auto mode or browse all models.
 
-  1. gpt-5.6-sol (default)  Latest frontier agentic coding model.
-  2. gpt-5.6-terra          Balanced agentic coding model for everyday work.
-  3. gpt-5.6-luna           Fast and affordable agentic coding model.
-  4. gpt-5.5                Frontier model for complex coding, research, and
-                            real-world work.
-› 5. gpt-5.2 (current)      Optimized for professional work and long-running
-                            agents.
+  1. codex-auto-review     Automatic approval review model for Codex.
+› 2. All models (current)  Choose a specific model and reasoning level
+                           (current: gpt-5.2)
 
   Press enter to confirm or esc to go back

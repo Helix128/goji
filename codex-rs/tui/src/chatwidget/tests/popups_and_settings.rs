@@ -3108,7 +3108,7 @@ async fn skills_menu_default_mentions_shortcut_snapshot() {
 }
 
 #[tokio::test]
-async fn model_picker_hides_show_in_picker_false_models_from_cache() {
+async fn model_picker_includes_show_in_picker_false_models_from_cache() {
     let (mut chat, _rx, _op_rx) = make_chatwidget_manual(Some("test-visible-model")).await;
     chat.thread_id = Some(ThreadId::new());
     let preset = |slug: &str, show_in_picker: bool| ModelPreset {
@@ -3139,14 +3139,14 @@ async fn model_picker_hides_show_in_picker_false_models_from_cache() {
         preset("test-hidden-model", false),
     ]);
     let popup = render_bottom_popup(&chat, /*width*/ 80);
-    assert_chatwidget_snapshot!("model_picker_filters_hidden_models", popup);
+    assert_chatwidget_snapshot!("model_picker_includes_hidden_models", popup);
     assert!(
         popup.contains("test-visible-model"),
         "expected visible model to appear in picker:\n{popup}"
     );
     assert!(
-        !popup.contains("test-hidden-model"),
-        "expected hidden model to be excluded from picker:\n{popup}"
+        popup.contains("test-hidden-model"),
+        "expected hidden model to appear in picker:\n{popup}"
     );
 }
 
