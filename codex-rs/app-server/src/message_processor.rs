@@ -996,6 +996,7 @@ impl MessageProcessor {
             ClientRequest::TurnStart { .. }
             | ClientRequest::TurnSteer { .. }
             | ClientRequest::ReviewStart { .. }
+            | ClientRequest::AdvisorStart { .. }
             | ClientRequest::ThreadCompactStart { .. }
             | ClientRequest::ThreadShellCommand { .. }
             | ClientRequest::ThreadQueueStart { .. }
@@ -1678,6 +1679,9 @@ impl MessageProcessor {
             }
             ClientRequest::ReviewStart { params, .. } => {
                 self.turn_processor.review_start(&request_id, params).await
+            }
+            ClientRequest::AdvisorStart { params, .. } => {
+                self.turn_processor.advisor_start(&request_id, params).await
             }
             ClientRequest::McpServerOauthLogin { params, .. } => {
                 self.mcp_processor.mcp_server_oauth_login(params).await

@@ -237,6 +237,26 @@ impl CodexThread {
         self.io.submit(op).await
     }
 
+    /// Consults the configured read-only advisor using this thread's recent history.
+    pub async fn consult_advisor(&self, worker_summary: &str) -> CodexResult<String> {
+        if self.session_source.is_non_root_agent() {
+            return Err(CodexErr::InvalidRequest(
+                "advisor is available only in root sessions".to_string(),
+            ));
+        }
+        let turn_context = self
+            .session
+            .new_turn_with_default_settings(self.session.next_internal_sub_id(), Default::default())
+            .await;
+        crate::advisor::request_advisor_consultation(
+            &self.session,
+            &turn_context,
+            worker_summary,
+            &CancellationToken::new(),
+        )
+        .await
+    }
+
     /// Returns the session telemetry handle for thread-scoped production instrumentation.
     pub fn session_telemetry(&self) -> SessionTelemetry {
         self.session.services.session_telemetry.clone()

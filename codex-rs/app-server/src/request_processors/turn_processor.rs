@@ -357,6 +357,16 @@ impl TurnRequestProcessor {
             .map(|()| None)
     }
 
+    pub(crate) async fn advisor_start(
+        &self,
+        request_id: &ConnectionRequestId,
+        params: AdvisorStartParams,
+    ) -> Result<Option<ClientResponsePayload>, JSONRPCErrorError> {
+        self.advisor_start_inner(request_id, params)
+            .await
+            .map(|response| Some(response.into()))
+    }
+
     fn track_error_response(
         &self,
         request_id: &ConnectionRequestId,
@@ -1593,6 +1603,84 @@ impl TurnRequestProcessor {
             }
         }
         Ok(())
+    }
+
+    async fn advisor_start_inner(
+        &self,
+        request_id: &ConnectionRequestId,
+        params: AdvisorStartParams,
+    ) -> Result<AdvisorStartResponse, JSONRPCErrorError> {
+        let (_, thread) = self.load_thread(&params.thread_id).await?;
+        self.ensure_direct_input_allowed(request_id, thread.as_ref())
+            .await?;
+        self.config_manager
+            .check_thread_model_provider(thread.config().await.as_ref())
+            .await
+            .map_err(|error| config_load_error(&error))?;
+
+        let feedback = thread
+            .consult_advisor(
+                "Review the current objective, approach, recent changes, failures, and the most important next step.",
+            )
+            .await
+            .map_err(|error| {
+                let error = match error.details() {
+                    CodexErrorDetails::InvalidRequest(message) => invalid_request(message.clone()),
+                    _ => internal_error(format!("advisor consultation failed: {error}")),
+                };
+                self.track_error_response(request_id, &error, /*error_type*/ None);
+                error
+            })?;
+        let worker_feedback = format!(
+            "Advisor feedback (read-only):\n{feedback}\n\nContinue the current task using your selected model. Verify the advice, and keep responsibility for tools and edits."
+        );
+        let submission = thread
+            .start_or_steer_turn(TurnInputRequest::new(TurnInput::ResponseItem(
+                ResponseItem::FunctionCallOutput {
+                    id: None,
+                    call_id: None,
+                    name: Some("consult_advisor".to_string()),
+                    namespace: None,
+                    output: FunctionCallOutputPayload {
+                        body: FunctionCallOutputBody::Text(worker_feedback),
+                        success: Some(true),
+                    },
+                    internal_chat_message_metadata_passthrough: None,
+                },
+            )))
+            .await
+            .map_err(|error| {
+                internal_error(format!("failed to submit advisor feedback: {error}"))
+            })?;
+        let turn_id = match submission {
+            TurnInputSubmission::Started { turn_id } | TurnInputSubmission::Steered { turn_id } => {
+                turn_id
+            }
+            TurnInputSubmission::NotSubmitted { reason } => {
+                let error = if reason == NotSubmittedReason::ServerDraining {
+                    crate::error_code::server_draining_error()
+                } else {
+                    internal_error(format!("failed to submit advisor feedback: {reason:?}"))
+                };
+                self.track_error_response(request_id, &error, /*error_type*/ None);
+                return Err(error);
+            }
+        };
+        self.outgoing
+            .record_request_turn_id(request_id, &turn_id)
+            .await;
+        Ok(AdvisorStartResponse {
+            turn: Turn {
+                id: turn_id,
+                items: vec![],
+                items_view: TurnItemsView::NotLoaded,
+                error: None,
+                status: TurnStatus::InProgress,
+                started_at: None,
+                completed_at: None,
+                duration_ms: None,
+            },
+        })
     }
 
     async fn turn_interrupt_inner(

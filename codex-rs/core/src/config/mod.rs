@@ -25,6 +25,7 @@ use codex_config::ResidencyRequirement;
 use codex_config::SandboxModeRequirement;
 use codex_config::Sourced;
 use codex_config::ThreadConfigLoader;
+use codex_config::config_toml::AdvisorConfigToml;
 use codex_config::config_toml::ConfigToml;
 use codex_config::config_toml::DEFAULT_PROJECT_DOC_MAX_BYTES;
 use codex_config::config_toml::ProjectConfig;
@@ -626,6 +627,7 @@ pub struct Config {
 
     /// Model used specifically for review sessions.
     pub review_model: Option<String>,
+    pub advisor: AdvisorConfigToml,
 
     /// Size of the context window for the model, in tokens.
     pub model_context_window: Option<i64>,
@@ -4250,6 +4252,7 @@ impl Config {
             model,
             service_tier,
             review_model,
+            advisor: cfg.advisor.unwrap_or_default(),
             model_context_window: cfg.model_context_window,
             model_auto_compact_token_limit: cfg.model_auto_compact_token_limit,
             model_auto_compact_token_limit_scope: cfg

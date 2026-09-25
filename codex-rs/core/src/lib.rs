@@ -53,6 +53,7 @@ pub use codex_thread::GuardianRootSnapshot;
 pub use codex_thread::ThreadConfigSnapshot;
 pub use session::turn_context::TurnContext;
 pub use thread_startup_metadata::ThreadStartupMetadata;
+mod advisor;
 mod agent;
 pub use agent::api::AgentConfigUpdate;
 pub use agent::api::AgentControl;

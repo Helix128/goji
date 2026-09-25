@@ -685,6 +685,25 @@ impl Session {
         )
     }
 
+    pub(crate) async fn responses_metadata_for_turn_context(
+        &self,
+        turn_context: &TurnContext,
+        request_kind: CodexResponsesRequestKind,
+    ) -> CodexResponsesMetadata {
+        let (window_id, window_number, context_window_id) = self.current_window().await;
+        let responses_metadata = turn_context.turn_metadata_state.to_responses_metadata(
+            self.installation_id.clone(),
+            window_id,
+            request_kind,
+        );
+        self.with_window_and_fork_metadata(
+            turn_context,
+            responses_metadata,
+            window_number,
+            context_window_id,
+        )
+    }
+
     // TODO(CDXENT-454): Build the compaction request and metadata from the captured execution.
     // Remote compaction currently attaches only finalized tool inventory because the rest of the
     // request remains turn-backed; local compaction does not have a finalized request inventory.
@@ -693,18 +712,11 @@ impl Session {
         turn_context: &TurnContext,
         compaction_metadata: CompactionTurnMetadata,
     ) -> CodexResponsesMetadata {
-        let (window_id, window_number, context_window_id) = self.current_window().await;
-        let responses_metadata = turn_context.turn_metadata_state.to_responses_metadata(
-            self.installation_id.clone(),
-            window_id,
-            CodexResponsesRequestKind::Compaction(compaction_metadata),
-        );
-        self.with_window_and_fork_metadata(
+        self.responses_metadata_for_turn_context(
             turn_context,
-            responses_metadata,
-            window_number,
-            context_window_id,
+            CodexResponsesRequestKind::Compaction(compaction_metadata),
         )
+        .await
     }
 
     pub(crate) fn with_window_and_fork_metadata(

@@ -1099,6 +1099,12 @@ client_request_definitions! {
         serialization: thread_id(params.thread_id),
         response: v2::ReviewStartResponse,
     },
+    #[experimental("advisor/start")]
+    AdvisorStart => "advisor/start" {
+        params: v2::AdvisorStartParams,
+        serialization: thread_id(params.thread_id),
+        response: v2::AdvisorStartResponse,
+    },
 
     ModelList => "model/list" {
         params: v2::ModelListParams,

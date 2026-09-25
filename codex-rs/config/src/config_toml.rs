@@ -167,6 +167,8 @@ pub struct ConfigToml {
     pub model: Option<String>,
     /// Review model override used by the `/review` feature.
     pub review_model: Option<String>,
+    /// Optional read-only strategic advisor for the worker model.
+    pub advisor: Option<AdvisorConfigToml>,
 
     /// Provider to use from the model_providers map.
     pub model_provider: Option<String>,
@@ -555,6 +557,26 @@ pub struct ConfigToml {
     pub experimental_use_unified_exec_tool: Option<bool>,
     /// Preferred OSS provider for local models, e.g. "lmstudio" or "ollama".
     pub oss_provider: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, JsonSchema)]
+#[schemars(deny_unknown_fields)]
+pub struct AdvisorConfigToml {
+    #[serde(default = "default_true")]
+    #[schemars(default = "default_true")]
+    pub enabled: bool,
+    pub model: Option<String>,
+    pub reasoning_effort: Option<ReasoningEffort>,
+}
+
+impl Default for AdvisorConfigToml {
+    fn default() -> Self {
+        Self {
+            enabled: true,
+            model: None,
+            reasoning_effort: None,
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, JsonSchema)]
@@ -1002,6 +1024,24 @@ mod tests {
                 "{mode:?}, {platform:?}, {level:?}"
             );
         }
+    }
+
+    #[test]
+    fn advisor_enabled_defaults_to_true_but_can_be_disabled() {
+        let defaulted: AdvisorConfigToml = toml::from_str("model = 'gpt-6-sol'")
+            .expect("advisor config without enabled should deserialize");
+        assert_eq!(
+            defaulted,
+            AdvisorConfigToml {
+                enabled: true,
+                model: Some("gpt-6-sol".to_string()),
+                reasoning_effort: None,
+            }
+        );
+
+        let disabled: AdvisorConfigToml =
+            toml::from_str("enabled = false").expect("advisor config should deserialize");
+        assert!(!disabled.enabled);
     }
 
     #[test]
