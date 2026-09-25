@@ -1,19 +1,24 @@
 //! Accept current account-scoped model replies and refresh present pickers without reopening them.
 //! Preserve highlighted models by wire slug, independent of their display names.
 
+use super::advisor_picker::ADVISOR_MODEL_SELECTION_VIEW_ID;
 use super::model_popups::ALL_MODELS_SELECTION_VIEW_ID;
 use super::model_popups::MODEL_SELECTION_VIEW_ID;
 use super::*;
 
 impl ChatWidget {
     fn model_popup_view_id(&self) -> Option<&'static str> {
-        [MODEL_SELECTION_VIEW_ID, ALL_MODELS_SELECTION_VIEW_ID]
-            .into_iter()
-            .find(|view_id| {
-                self.bottom_pane
-                    .selected_index_for_present_view(view_id)
-                    .is_some()
-            })
+        [
+            MODEL_SELECTION_VIEW_ID,
+            ALL_MODELS_SELECTION_VIEW_ID,
+            ADVISOR_MODEL_SELECTION_VIEW_ID,
+        ]
+        .into_iter()
+        .find(|view_id| {
+            self.bottom_pane
+                .selected_index_for_present_view(view_id)
+                .is_some()
+        })
     }
 
     pub(crate) fn model_popup_request_is_current(&self, request_id: uuid::Uuid) -> bool {
@@ -51,6 +56,9 @@ impl ChatWidget {
                 self.model_catalog.try_list_models().unwrap_or_default(),
             ),
             Some(ALL_MODELS_SELECTION_VIEW_ID) => self.open_all_models_popup(),
+            Some(ADVISOR_MODEL_SELECTION_VIEW_ID) => self.open_advisor_picker_with_presets(
+                self.model_catalog.try_list_models().unwrap_or_default(),
+            ),
             _ => {}
         }
     }

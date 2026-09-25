@@ -1239,6 +1239,13 @@ pub(crate) enum AppEvent {
     OpenReasoningPopup {
         model: ModelPreset,
     },
+    OpenAdvisorReasoningPopup {
+        model: ModelPreset,
+    },
+    PersistAdvisorSelection {
+        model: String,
+        effort: Option<ReasoningEffort>,
+    },
 
     /// Open the explicit Max/Ultra reasoning selection popup for a model.
     OpenAdvancedReasoningPopup {

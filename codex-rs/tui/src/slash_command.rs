@@ -27,6 +27,7 @@ pub enum SlashCommand {
     Import,
     Hooks,
     Review,
+    Advisor,
     Rename,
     New,
     Archive,
@@ -95,6 +96,7 @@ impl SlashCommand {
             SlashCommand::Compact => "summarize conversation to prevent hitting the context limit",
             SlashCommand::Recap => "summarize the current conversation now",
             SlashCommand::Review => "review my current changes and find issues",
+            SlashCommand::Advisor => "choose the advisor model and reasoning effort",
             SlashCommand::Rename => "rename the current thread",
             SlashCommand::Resume => "resume a saved chat",
             SlashCommand::Archive => "archive this session",
@@ -255,6 +257,7 @@ impl SlashCommand {
             | SlashCommand::Memories
             | SlashCommand::Import
             | SlashCommand::Review
+            | SlashCommand::Advisor
             | SlashCommand::Plan
             | SlashCommand::Cd
             | SlashCommand::Clear

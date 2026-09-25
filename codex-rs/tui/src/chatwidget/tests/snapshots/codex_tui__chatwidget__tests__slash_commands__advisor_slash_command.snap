@@ -1,0 +1,10 @@
+---
+source: tui/src/chatwidget/tests/slash_commands.rs
+assertion_line: 12
+expression: "render_bottom_popup(&chat, 80)"
+---
+› /advisor  choose the advisor model and reasoning effort
+
+› /advis
+
+  GPT-5.6-Sol default · /tmp/project

@@ -36,6 +36,7 @@ impl StatusLineAccent {
         match item {
             StatusLineItem::ModelName
             | StatusLineItem::ModelWithReasoning
+            | StatusLineItem::Advisor
             | StatusLineItem::Reasoning => Self::Model,
             StatusLineItem::CurrentDir | StatusLineItem::ProjectRoot => Self::Path,
             StatusLineItem::GitBranch

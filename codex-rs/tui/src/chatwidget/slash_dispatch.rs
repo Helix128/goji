@@ -331,6 +331,9 @@ impl ChatWidget {
                     self.defer_input_until_settings_applied();
                 }
             }
+            SlashCommand::Advisor => {
+                self.open_advisor_picker();
+            }
             SlashCommand::Rename => {
                 self.session_telemetry
                     .counter("codex.thread.rename", /*inc*/ 1, &[]);
@@ -1254,6 +1257,7 @@ impl ChatWidget {
             | SlashCommand::Init
             | SlashCommand::Compact
             | SlashCommand::Review
+            | SlashCommand::Advisor
             | SlashCommand::Model
             | SlashCommand::Plan
             | SlashCommand::Goal

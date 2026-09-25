@@ -2035,6 +2035,41 @@ impl App {
             AppEvent::OpenReasoningPopup { model } => {
                 self.chat_widget.open_reasoning_popup(model);
             }
+            AppEvent::OpenAdvisorReasoningPopup { model } => {
+                self.chat_widget.open_advisor_reasoning_popup(model);
+            }
+            AppEvent::PersistAdvisorSelection { model, effort } => {
+                match self.persist_model_defaults(
+                    app_server.request_handle(),
+                    vec![
+                        crate::config_update::replace_config_value(
+                            "advisor.enabled",
+                            serde_json::json!(true),
+                        ),
+                        crate::config_update::replace_config_value(
+                            "advisor.model",
+                            serde_json::json!(model),
+                        ),
+                        effort.as_ref().map_or_else(
+                            || crate::config_update::clear_config_value("advisor.reasoning_effort"),
+                            |effort| crate::config_update::replace_config_value(
+                                "advisor.reasoning_effort",
+                                serde_json::json!(effort.to_string()),
+                            ),
+                        ),
+                    ],
+                    "advisor model and reasoning effort",
+                ).await {
+                    Ok(()) => self.chat_widget.add_info_message(
+                        format!("Advisor set to {model}{}", effort.as_ref().map(|effort| format!(" {effort} reasoning")).unwrap_or_default()),
+                        /*hint*/ None,
+                    ),
+                    Err(err) => self.chat_widget.add_error_message(format!(
+                        "Failed to save advisor selection: {}",
+                        format_config_error(&err),
+                    )),
+                }
+            }
             AppEvent::OpenAdvancedReasoningPopup { model } => {
                 self.chat_widget.open_advanced_reasoning_popup(model);
             }

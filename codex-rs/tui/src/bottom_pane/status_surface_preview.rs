@@ -38,6 +38,7 @@ pub(crate) enum StatusSurfacePreviewItem {
     WorkspaceHeadline,
     Model,
     ModelWithReasoning,
+    Advisor,
     Reasoning,
     TaskProgress,
 }
@@ -75,6 +76,7 @@ impl StatusSurfacePreviewItem {
             StatusSurfacePreviewItem::WorkspaceHeadline => "Workspace headline",
             StatusSurfacePreviewItem::Model => "gpt-5.2-codex",
             StatusSurfacePreviewItem::ModelWithReasoning => "gpt-5.2-codex medium",
+            StatusSurfacePreviewItem::Advisor => "advisor gpt-6-astra high",
             StatusSurfacePreviewItem::Reasoning => "medium",
             StatusSurfacePreviewItem::TaskProgress => "Tasks 0/0",
         }
@@ -112,6 +114,7 @@ impl StatusSurfacePreviewItem {
             Self::WorkspaceHeadline,
             Self::Model,
             Self::ModelWithReasoning,
+            Self::Advisor,
             Self::Reasoning,
             Self::TaskProgress,
         ]

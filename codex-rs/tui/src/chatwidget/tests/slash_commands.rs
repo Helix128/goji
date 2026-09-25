@@ -4,6 +4,30 @@ use crate::bottom_pane::slash_commands::ServiceTierCommand;
 use pretty_assertions::assert_eq;
 use serial_test::serial;
 
+#[tokio::test]
+async fn advisor_slash_command_is_visible_in_composer() {
+    let (mut chat, _rx, _op_rx) = make_chatwidget_manual(/*model_override*/ None).await;
+    chat.bottom_pane
+        .set_composer_text("/advis".to_string(), Vec::new(), Vec::new());
+    insta::assert_snapshot!(
+        "advisor_slash_command",
+        render_bottom_popup(&chat, /*width*/ 80),
+    );
+}
+
+#[tokio::test]
+async fn advisor_slash_command_opens_model_picker() {
+    let (mut chat, _rx, _op_rx) = make_chatwidget_manual(/*model_override*/ None).await;
+    chat.thread_id = Some(ThreadId::new());
+
+    chat.dispatch_command(SlashCommand::Advisor);
+
+    assert_chatwidget_snapshot!(
+        "advisor_slash_opens_model_picker",
+        render_bottom_popup(&chat, /*width*/ 80),
+    );
+}
+
 fn force_pet_image_support(chat: &mut ChatWidget) {
     chat.set_pet_image_support_for_tests(crate::pets::PetImageSupport::Supported(
         crate::pets::ImageProtocol::Kitty,

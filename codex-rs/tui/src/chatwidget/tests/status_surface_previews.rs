@@ -217,6 +217,27 @@ async fn thread_title_falls_back_to_thread_id_when_unnamed() {
 }
 
 #[tokio::test]
+async fn status_line_displays_advisor_model_with_configured_or_default_effort() {
+    let (mut chat, _rx, _op_rx) = make_chatwidget_manual(/*model_override*/ None).await;
+    let advisor_model = chat.model_catalog.models[0].model.clone();
+    let default_effort = chat.model_catalog.models[0]
+        .default_reasoning_effort
+        .to_string();
+    chat.config.advisor.model = Some(advisor_model.clone());
+
+    assert_eq!(
+        status_preview_line(&mut chat, &[StatusLineItem::Advisor]),
+        format!("advisor {advisor_model} {default_effort}")
+    );
+
+    chat.config.advisor.reasoning_effort = Some(ReasoningEffortConfig::High);
+    assert_eq!(
+        status_preview_line(&mut chat, &[StatusLineItem::Advisor]),
+        format!("advisor {advisor_model} high")
+    );
+}
+
+#[tokio::test]
 async fn status_line_setup_popup_hardcoded_only_snapshot() {
     let (mut chat, _rx, _op_rx) = make_chatwidget_manual(/*model_override*/ None).await;
     chat.local_settings.tui.status_line = Some(vec![

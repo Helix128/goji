@@ -3310,6 +3310,34 @@ async fn model_selection_popup_snapshot() {
     assert_chatwidget_snapshot!("model_selection_popup", popup);
 }
 
+#[tokio::test]
+async fn advisor_selection_popups_snapshot() {
+    let (mut chat, mut rx, _op_rx) = make_chatwidget_manual(Some("gpt-5.5")).await;
+    chat.thread_id = Some(ThreadId::new());
+    chat.open_advisor_picker();
+    let models = render_bottom_popup(&chat, /*width*/ 80);
+    assert_chatwidget_snapshot!("advisor_model_selection_popup", models);
+
+    while rx.try_recv().is_ok() {}
+    chat.handle_key_event(KeyEvent::from(KeyCode::Enter));
+    let AppEvent::OpenAdvisorReasoningPopup { model } = rx.try_recv().unwrap() else {
+        panic!("expected advisor reasoning selection");
+    };
+    let selected_model = model.model.clone();
+    chat.open_advisor_reasoning_popup(model);
+    let reasoning = render_bottom_popup(&chat, /*width*/ 80);
+    assert_chatwidget_snapshot!("advisor_reasoning_selection_popup", reasoning);
+
+    chat.handle_key_event(KeyEvent::from(KeyCode::Enter));
+    assert_matches!(
+        rx.try_recv().unwrap(),
+        AppEvent::PersistAdvisorSelection {
+            model,
+            effort: Some(ReasoningEffortConfig::Low),
+        } if model == selected_model
+    );
+}
+
 fn apply_model_list_response(chat: &mut ChatWidget, presets: Vec<ModelPreset>) {
     let request_id = chat.model_popup_request_id.expect("pending model request");
     assert!(chat.on_models_loaded(request_id, Ok(presets)));

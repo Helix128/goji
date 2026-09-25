@@ -1,0 +1,16 @@
+---
+source: tui/src/chatwidget/tests/popups_and_settings.rs
+assertion_line: 3328
+expression: reasoning
+---
+  Advisor Reasoning · GPT-6-Astra
+
+
+› 1. Low
+  2. Medium
+  3. High
+  4. Extra high
+  5. Max
+  6. Ultra
+
+  enter select · esc back

@@ -713,6 +713,19 @@ impl ChatWidget {
         match item {
             StatusLineItem::ModelName => Some(self.model_display_name().to_string()),
             StatusLineItem::ModelWithReasoning => Some(self.model_with_reasoning_display_name()),
+            StatusLineItem::Advisor => self.config.advisor.model.as_deref().map(|model| {
+                let effort = self.config.advisor.reasoning_effort.clone().or_else(|| {
+                    self.model_catalog
+                        .models
+                        .iter()
+                        .find(|preset| preset.model == model)
+                        .map(|preset| preset.default_reasoning_effort.clone())
+                });
+                match effort {
+                    Some(effort) => format!("advisor {model} {effort}"),
+                    None => format!("advisor {model}"),
+                }
+            }),
             StatusLineItem::Reasoning => Some(self.reasoning_display_name()),
             StatusLineItem::CurrentDir => {
                 Some(format_directory_display(
@@ -873,6 +886,7 @@ impl ChatWidget {
             StatusSurfacePreviewItem::Model => StatusLineItem::ModelName,
             StatusSurfacePreviewItem::ModelWithReasoning => StatusLineItem::ModelWithReasoning,
             StatusSurfacePreviewItem::Reasoning => StatusLineItem::Reasoning,
+            StatusSurfacePreviewItem::Advisor => StatusLineItem::Advisor,
         };
         self.status_line_value_for_item(status_line_item)
     }
